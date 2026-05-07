@@ -1,7 +1,6 @@
 import { queryOptions, useQuery, useMutation } from "@tanstack/react-query";
 import { getQueryClient } from "@/lib/query-client";
 import { Appointment, AppointmentForm, AppointmentStatus } from "@/types";
-import { toast } from "sonner";
 
 export const appointmentKeys = {
   all: ["appointments"] as const,
@@ -30,16 +29,16 @@ export const useCreateAppointment = () =>
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error("Failed to create appointment");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.message || "Failed to create appointment");
+      }
       return res.json();
     },
     onSuccess: () => {
       getQueryClient().invalidateQueries({ queryKey: appointmentKeys.lists() });
       getQueryClient().invalidateQueries({ queryKey: ["dashboard"] });
-      toast.success("Appointment created successfully!");
     },
-    onError: (err: Error) =>
-      toast.error(err.message || "Failed to create appointment"),
   });
 
 export const useUpdateAppointment = () =>
@@ -57,10 +56,7 @@ export const useUpdateAppointment = () =>
       getQueryClient().invalidateQueries({ queryKey: appointmentKeys.lists() });
       getQueryClient().invalidateQueries({ queryKey: appointmentKeys.detail(id) });
       getQueryClient().invalidateQueries({ queryKey: ["dashboard"] });
-      toast.success("Appointment updated successfully!");
     },
-    onError: (err: Error) =>
-      toast.error(err.message || "Failed to update appointment"),
   });
 
 export const useUpdateAppointmentStatus = () =>
@@ -79,17 +75,17 @@ export const useUpdateAppointmentStatus = () =>
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, notes }),
       });
-      if (!res.ok) throw new Error("Failed to update status");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.message || "Failed to update status");
+      }
       return res.json();
     },
     onSuccess: (_, { id }) => {
       getQueryClient().invalidateQueries({ queryKey: appointmentKeys.lists() });
       getQueryClient().invalidateQueries({ queryKey: appointmentKeys.detail(id) });
       getQueryClient().invalidateQueries({ queryKey: ["dashboard"] });
-      toast.success("Appointment status updated!");
     },
-    onError: (err: Error) =>
-      toast.error(err.message || "Failed to update status"),
   });
 
 export const useDeleteAppointment = () =>
@@ -100,11 +96,8 @@ export const useDeleteAppointment = () =>
       return res.json();
     },
     onSuccess: (_, id) => {
-      getQueryClient().invalidateQueries({ queryKey: appointmentKeys.lists() }); ``
+      getQueryClient().invalidateQueries({ queryKey: appointmentKeys.lists() });
       getQueryClient().removeQueries({ queryKey: appointmentKeys.detail(id) });
       getQueryClient().invalidateQueries({ queryKey: ["dashboard"] });
-      toast.success("Appointment deleted successfully!");
     },
-    onError: (err: Error) =>
-      toast.error(err.message || "Failed to delete appointment"),
   });

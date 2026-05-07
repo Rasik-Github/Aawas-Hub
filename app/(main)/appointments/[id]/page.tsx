@@ -88,14 +88,19 @@ export default function AppointmentDetailPage() {
     return <p className="text-center py-20">Appointment not found</p>;
 
   const firstImage = images.length > 0 ? images[0].url : null;
-  const isScheduled = appointment.status === "scheduled";
-  const isApproved = appointment.status === "approved";
-  const isCancelled = appointment.status === "cancelled";
-  const isCompleted = appointment.status === "completed";
+  const history = appointment.activityHistory ?? [];
+  const currentStatus = (history[history.length - 1]?.status ?? "scheduled") as string;
+  const isScheduled = currentStatus === "scheduled";
+  const isApproved = currentStatus === "approved";
+  const isCancelled = currentStatus === "cancelled";
+  const isCompleted = currentStatus === "completed";
 
   const handleDelete = () => {
     del.mutate(id, {
-      onSuccess: () => router.push("/dashboard"),
+      onSuccess: () => {
+        toast.success("Appointment deleted successfully!");
+        router.push("/dashboard");
+      },
       onError: (err: any) =>
         toast.error(err?.message || "Failed to delete appointment"),
     });
@@ -103,16 +108,16 @@ export default function AppointmentDetailPage() {
 
   const timeline = [
     {
-      date: appointment?.createdAt,
+      date: appointment.createdAt,
       label: "Created",
       note: "Initial request sent.",
     },
-    appointment.notes && {
-      date: appointment?.createdAt,
-      label: "Updated",
-      note: appointment.notes,
-    },
-  ].filter(Boolean);
+    ...(appointment.activityHistory ?? []).map((entry) => ({
+      date: entry.changedAt,
+      label: entry.status.charAt(0).toUpperCase() + entry.status.slice(1),
+      note: entry.note || `Status changed to ${entry.status}`,
+    })),
+  ];
 
   const handleOpenDialog = (status: "approved" | "cancelled") => {
     setStatusToUpdate(status);
@@ -128,6 +133,7 @@ export default function AppointmentDetailPage() {
           toast.success(`Appointment ${statusToUpdate} successfully!`);
           setDialogOpen(false);
           setNote("");
+          router.push(`/appointments/${id}`);
         },
         onError: (err: any) => toast.error(err?.message || "Failed"),
       },
@@ -154,7 +160,7 @@ export default function AppointmentDetailPage() {
                 </div>
               )}
               <div className="absolute top-4 right-4">
-                <StatusBadge status={appointment.status} />
+                <StatusBadge status={currentStatus} />
               </div>
             </div>
 
@@ -224,11 +230,15 @@ export default function AppointmentDetailPage() {
                       <Button
                         className="w-full"
                         onClick={() =>
-                          updateStatus.mutate({
-                            id,
-                            status: "completed",
-                            notes: appointment.notes,
-                          })
+                          updateStatus.mutate(
+                            { id, status: "completed", notes: "" },
+                            {
+                              onSuccess: () =>
+                                toast.success("Appointment completed!"),
+                              onError: (err: any) =>
+                                toast.error(err?.message || "Failed to complete appointment"),
+                            },
+                          )
                         }
                       >
                         Complete

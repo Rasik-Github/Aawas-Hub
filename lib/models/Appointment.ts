@@ -1,5 +1,11 @@
 import { Schema, model, models, Types } from "mongoose";
 
+export interface IActivityEntry {
+  status: string;
+  note: string;
+  changedAt: Date;
+}
+
 export interface IAppointment {
   title: string;
   type: "Property Viewing" | "Inspection" | "Legal Review";
@@ -7,11 +13,19 @@ export interface IAppointment {
   propertyId?: Types.ObjectId;
   participants: Types.ObjectId[];
   createdBy: Types.ObjectId;
-  status: "scheduled" | "completed" | "cancelled" | "approved";
   createdAt: Date;
   image?: string;
-  notes?: string;
+  activityHistory: IActivityEntry[];
 }
+
+const ActivityEntrySchema = new Schema<IActivityEntry>(
+  {
+    status: { type: String, required: true },
+    note: { type: String, trim: true, maxlength: 500, default: "" },
+    changedAt: { type: Date, default: Date.now },
+  },
+  { _id: false },
+);
 
 const AppointmentSchema = new Schema<IAppointment>({
   title: { type: String, required: true, trim: true, maxlength: 200 },
@@ -26,14 +40,9 @@ const AppointmentSchema = new Schema<IAppointment>({
     { type: Schema.Types.ObjectId, ref: "users", required: true, index: true },
   ],
   createdBy: { type: Schema.Types.ObjectId, ref: "users", required: true },
-  status: {
-    type: String,
-    enum: ["scheduled", "completed", "cancelled", "approved"],
-    default: "scheduled",
-  },
   createdAt: { type: Date, default: Date.now },
   image: { type: String, default: null },
-  notes: { type: String, trim: true, maxlength: 500, default: "" },
+  activityHistory: { type: [ActivityEntrySchema], default: [] },
 });
 
 export const Appointment =
