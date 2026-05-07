@@ -29,6 +29,13 @@ export async function POST(req: Request) {
     ...body,
     createdBy: session.user.id,
     participants,
+    activityHistory: [
+      {
+        status: "scheduled",
+        note: body.notes || "Appointment created",
+        changedAt: new Date(),
+      },
+    ],
   });
 
   return NextResponse.json(appointment);

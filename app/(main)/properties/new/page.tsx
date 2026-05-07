@@ -48,7 +48,7 @@ export default function NewPropertyPage() {
         toast.success("Property created successfully");
         router.push(`/properties/${data.property._id}`);
       },
-      onError: () => toast.error("Failed to create property"),
+      onError: (err: Error) => toast.error(err.message || "Failed to create property"),
     });
   }
 

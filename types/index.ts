@@ -43,18 +43,23 @@ export type AppointmentStatus =
   | "cancelled"
   | "approved";
 
+export interface ActivityEntry {
+  status: AppointmentStatus;
+  note: string;
+  changedAt: string;
+}
+
 export interface Appointment {
   _id: string;
   title: string;
   type: "Property Viewing" | "Inspection" | "Legal Review";
   date: string;
-  notes?: string;
   propertyId?: string;
   participants: string[];
   createdBy: string;
-  status: AppointmentStatus;
   createdAt: string;
   image?: string;
+  activityHistory: ActivityEntry[];
 }
 
 export interface AppointmentForm {

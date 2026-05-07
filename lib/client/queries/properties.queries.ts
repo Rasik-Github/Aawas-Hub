@@ -195,7 +195,10 @@ export const useCreateProperty = () =>
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error("Failed to create property");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.message || "Failed to create property");
+      }
       return res.json();
     },
     onSuccess: () => {
