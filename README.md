@@ -196,3 +196,21 @@ For issues or questions:
 ## License
 
 MIT License - See LICENSE file for details
+
+
+## Project Information
+
+This project was developed as part of a group academic assignment focused on building a full-stack real estate management platform. 
+**Team Members:** 
+- Rasik Bhattarai
+- Rabindra Basnet 
+- Sudip Pathak
+- Prasidha Nepal
+
+**My Contribution**
+- Developed frontend components, including key user interface pages and reusable UI elements
+- Implemented property management features such as property listing display and related UI functionalities
+- Contributed to backend functionality by assisting in API development and feature integration
+- Contributed in MongoDB database design, including structuring collections and defining data models
+- Integrated frontend and backend components to ensure smooth data flow across the application
+- Involved in debugging, testing, and improving overall application performance and stability
